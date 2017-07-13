@@ -1,15 +1,15 @@
 
 var authKey = require("./keys.js")
 var inquirer = require("inquirer")
+var fs = require("fs");
 var userCommand;
 var userChoice;
-
 
 inquirer.prompt([
 	{
 		type: "list",
 		message: "What Would you like to do?",
-		choices: ["my-tweets", "spotify-this-song", "movie-this"],
+		choices: ["my-tweets", "spotify-this-song", "movie-this", "do-what-it-says"],
 		name: "yourChoice"
 	},
 	{
@@ -29,7 +29,6 @@ inquirer.prompt([
 
 		});
 
-
 		function choices (){
 			switch(userCommand){
 				case "my-tweets":
@@ -41,11 +40,14 @@ inquirer.prompt([
 				case "movie-this":
 				omdb();
 				break;
+        case "do-what-it-says":
+        doThis();
+        break;
+
 
 
 			}
 		}
-
 
 //used to grab twitter keys
 var command = process.argv[2]
@@ -53,15 +55,10 @@ var command = process.argv[2]
 function omdb () {
 
 var request = require('request');
-// var nodeArgs = process.argv;
+
 var movieName = userChoice;
 
-// for (var i = 3; i < nodeArgs.length; i++) {
-//   movieName = movieName +" "+ nodeArgs[i];
-// }
-
 var queryUrl = "http://www.omdbapi.com/?t=" + movieName + "&y=&plot=full&apikey=40e9cece";
-//var nodeArgs = process.argv;
 
 var options = {
   url: queryUrl
@@ -85,17 +82,11 @@ function callback(error, response, body) {
 request(options, callback);
 }
 
-
 function tweets() {
 
 var Twitter = require('twitter');
 
-var client = new Twitter({
-  consumer_key: 'i4Z4tHPtLNaPP4PJrK8cE6jej',
-  consumer_secret: '9LJIkhffhEC5Y3UGE2y2nQ2FLV0iOco8yDyXmnuBbEg63D82wi',
-  access_token_key: '885184268770709505-U4emYfMeJN7kO0BqUYkcqBVHmtlguix',
-  access_token_secret: 'IVpWnxYOV4ONBn0RcXZlAVYLd3kwH1QYMojdig3joi9Ew'
-});
+var client = new Twitter(authKey.twitterKeys);
 
 var params = {screen_name: 'EFRED321'};
 client.get('statuses/user_timeline', params, function(error, tweets, response) {
@@ -114,8 +105,6 @@ client.get('statuses/user_timeline', params, function(error, tweets, response) {
 });
 console.log('this is loaded');
 
-
-authKey.twitterKeys
 }
 
 function spotifySong () {
@@ -126,7 +115,6 @@ var spotify = new Spotify({
   id: "2532eb8170bf42d4bf2725054cc1e6c0",
   secret: "e2538c827e8c495fbfac4aba86f52f84"
 });
-
 
 spotify.search({ type: 'track', query: userChoice, limit:1 }, function(err, data) {
   if (err) {
@@ -141,3 +129,20 @@ spotify.search({ type: 'track', query: userChoice, limit:1 }, function(err, data
 });
 
     }
+
+function doThis () {
+    
+    fs.readFile("random.txt", "utf8", function(error, data) {
+
+  // If the code experiences any errors it will log the error to the console.
+  if (error) {
+    return console.log(error);
+  }
+
+  userChoice = data;
+  spotifySong();
+
+  });
+    }
+
+   
